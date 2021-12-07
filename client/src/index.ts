@@ -9,7 +9,7 @@ import { client } from "./game/network";
 // Re-using server-side types for networking
 // This is optional, but highly recommended
 import { StateHandler } from "../../server/src/rooms/StateHandler";
-import { PressedKeys } from "../../server/src/entities/Player";
+import { Colour, PressedKeys } from "../../server/src/entities/Player";
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas, true);
@@ -17,14 +17,8 @@ const engine = new BABYLON.Engine(canvas, true);
 // This creates a basic Babylon Scene object (non-mesh)
 var scene = new BABYLON.Scene(engine);
 
-// This creates and positions a free camera (non-mesh)
-var camera = new BABYLON.FollowCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
-
-// This targets the camera to scene origin
-camera.setTarget(BABYLON.Vector3.Zero());
-
-// This attaches the camera to the canvas
-camera.attachControl(true);
+var camera = new BABYLON.ArcRotateCamera("camera", -1.5, 1, 10, BABYLON.Vector3.Zero(), scene);
+camera.attachControl(canvas, true);
 
 // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
 var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
@@ -67,7 +61,7 @@ client.joinOrCreate<StateHandler>("game", {playerName}).then(room => {
     const playerViews: {[id: string]: BABYLON.Mesh} = {};
 
     room.state.players.onAdd = function(player, key) {
-
+    
         playerViews[key] = createAvatar(scene, player.colour, player.name);
 
         // Move the sphere upward 1/2 its height
@@ -96,26 +90,26 @@ client.joinOrCreate<StateHandler>("game", {playerName}).then(room => {
     // Keyboard listeners
     const keyboard: PressedKeys = { x: 0, y: 0 };
     window.addEventListener("keydown", function(e) {
-        if (e.which === Keycode.LEFT) {
+        if (e.which === Keycode.A) {
             keyboard.x = -1;
-        } else if (e.which === Keycode.RIGHT) {
+        } else if (e.which === Keycode.D) {
             keyboard.x = 1;
-        } else if (e.which === Keycode.UP) {
+        } else if (e.which === Keycode.W) {
             keyboard.y = -1;
-        } else if (e.which === Keycode.DOWN) {
+        } else if (e.which === Keycode.S) {
             keyboard.y = 1;
         }
         room.send('key', keyboard);
     });
 
     window.addEventListener("keyup", function(e) {
-        if (e.which === Keycode.LEFT) {
+        if (e.which === Keycode.A) {
             keyboard.x = 0;
-        } else if (e.which === Keycode.RIGHT) {
+        } else if (e.which === Keycode.D) {
             keyboard.x = 0;
-        } else if (e.which === Keycode.UP) {
+        } else if (e.which === Keycode.W) {
             keyboard.y = 0;
-        } else if (e.which === Keycode.DOWN) {
+        } else if (e.which === Keycode.S) {
             keyboard.y = 0;
         }
         room.send('key', keyboard);
