@@ -6,7 +6,7 @@ import { Player } from "../entities/Player";
 export class GameRoom extends Room<StateHandler> {
     maxClients = 8;
 
-    onCreate (options) {
+    onCreate () {
         this.setSimulationInterval(() => this.onUpdate());
         this.setState(new StateHandler());
 
@@ -15,9 +15,10 @@ export class GameRoom extends Room<StateHandler> {
         });
     }
 
-    onJoin (client) {
+    onJoin (client, {playerName}) {
+
         const player = new Player();
-        player.name = `Player ${ this.clients.length }`;
+        player.name = playerName || `Player ${this.state.players.size}`;
         player.position.x = Math.random();
         player.position.y = Math.random();
         player.position.z = Math.random();

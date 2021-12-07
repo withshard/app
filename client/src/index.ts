@@ -1,6 +1,7 @@
 import "./index.css";
 
 import * as BABYLON from "babylonjs";
+import * as GUI from 'babylonjs-gui';
 import Keycode from "keycode.js";
 
 import { client } from "./game/network";
@@ -34,21 +35,40 @@ light.intensity = 0.7;
 // Our built-in 'ground' shape. Params: name, width, depth, subdivs, scene
 var ground = BABYLON.Mesh.CreateGround("ground1", 6, 6, 2, scene);
 
-// Attach default camera mouse navigation
-// camera.attachControl(canvas);
+const playerName = prompt("What's your name?");
+
+const createAvatar = (scene: BABYLON.Scene, colour: Colour, name: string) => {
+    const sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
+
+        const material = new BABYLON.StandardMaterial(`mat1`, scene);
+        material.alpha = 1;
+        material.diffuseColor = new BABYLON.Color3(colour.r, colour.g, colour.b);
+        sphere.material = material;
+
+        const nametag = BABYLON.Mesh.CreatePlane("nametag", 0.7, scene);
+        nametag.parent = sphere;
+        nametag.position.y = 2;
+        
+        const advancedTexture = GUI.AdvancedDynamicTexture.CreateForMesh(nametag);
+
+        const nameButton = GUI.Button.CreateSimpleButton("but1", name);
+        nameButton.color = "white";
+        nameButton.fontSize = 150;
+        nameButton.background = "green";
+        
+        advancedTexture.addControl(nameButton);
+
+        return BABYLON.Mesh.MergeMeshes([sphere, nametag], true, true, undefined, false, true);;
+} 
 
 // Colyseus / Join Room
-client.joinOrCreate<StateHandler>("game").then(room => {
+client.joinOrCreate<StateHandler>("game", {playerName}).then(room => {
+
     const playerViews: {[id: string]: BABYLON.Mesh} = {};
 
     room.state.players.onAdd = function(player, key) {
-        // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
-        playerViews[key] = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
 
-        var material = new BABYLON.StandardMaterial(``, scene);
-        material.alpha = 1;
-        material.diffuseColor = new BABYLON.Color3(player.colour.r, player.colour.g, player.colour.b);
-        playerViews[key].material = material; // <--
+        playerViews[key] = createAvatar(scene, player.colour, player.name);
 
         // Move the sphere upward 1/2 its height
         playerViews[key].position.set(player.position.x, player.position.y, player.position.z);
