@@ -20,7 +20,7 @@ export class GameRoom extends Room<StateHandler> {
         const player = new Player();
         player.name = playerName || `Player ${this.state.players.size}`;
         player.position.x = Math.random();
-        player.position.y = Math.random();
+        player.position.y = 0;
         player.position.z = Math.random();
 
         player.colour.r = Math.random();

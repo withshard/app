@@ -34,6 +34,7 @@ const playerName = prompt("What's your name?");
 
 const createAvatar = (scene: BABYLON.Scene, colour: Colour, name: string) => {
     const sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
+    sphere.position.y = 1;    
 
         const material = new BABYLON.StandardMaterial(`mat1`, scene);
         material.alpha = 1;
@@ -53,7 +54,7 @@ const createAvatar = (scene: BABYLON.Scene, colour: Colour, name: string) => {
         
         advancedTexture.addControl(nameButton);
 
-        return BABYLON.Mesh.MergeMeshes([sphere, nametag], true, true, undefined, false, true);;
+    return BABYLON.Mesh.MergeMeshes([sphere, nametag], true, true, undefined, false, true);
 } 
 
 // Colyseus / Join Room
