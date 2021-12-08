@@ -27,7 +27,6 @@ var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0),
 // Default intensity is 1. Let's dim the light a small amount
 light.intensity = 0.7;
 
-
 // Our built-in 'ground' shape. Params: name, width, depth, subdivs, scene
 var ground = BABYLON.Mesh.CreateGround("ground1", 6, 6, 2, scene);
 
@@ -44,7 +43,7 @@ const createAvatar = (scene: BABYLON.Scene, colour: Colour, name: string) => {
         const nametag = BABYLON.Mesh.CreatePlane("nametag", 0.7, scene);
         nametag.parent = sphere;
         nametag.position.y = 2;
-       
+        
         const advancedTexture = GUI.AdvancedDynamicTexture.CreateForMesh(nametag);
 
         const nameButton = GUI.Button.CreateSimpleButton("but1", name);
@@ -54,43 +53,8 @@ const createAvatar = (scene: BABYLON.Scene, colour: Colour, name: string) => {
         
         advancedTexture.addControl(nameButton);
 
-        var axis1, axis2, axis3;
-
-        axis1 = (sphere.position).subtract(nametag.position);
-        nametag.scaling.x = axis1.length();
-      
-        scene.registerBeforeRender(function() {
-          axis1 = (sphere.position).subtract(nametag.position);
-          axis3 = BABYLON.Vector3.Cross(camera.position, axis1);
-          axis2 = BABYLON.Vector3.Cross(axis3, axis1);
-          
-          nametag.rotation = BABYLON.Vector3.RotationFromAxis(axis1, axis2, axis3);
-          
-        });
-
         return BABYLON.Mesh.MergeMeshes([sphere, nametag], true, true, undefined, false, true);;
 } 
-
-// BABYLON.SceneLoader.ImportMesh(
-//     undefined, // Name of meshes to load
-//     "/dist/", // Path on a server for the file
-//     "eye_sphere.gltf", // The file name that should be loaded from the above path
-//     scene, // The scene to load this mesh/model file into
-//     function (
-//         meshes, 
-//         particleSystems,
-//         skeletons,
-//         animationList
-//     ) {
-//         // Custom Code to run after Loading has finished
-//         meshes.forEach(mesh => {
-//             // give material
-//             mesh.material = new BABYLON.StandardMaterial("mat1", scene);   
-            
-//     });
-// }
-// );
-
 
 // Colyseus / Join Room
 client.joinOrCreate<StateHandler>("game", {playerName}).then(room => {
