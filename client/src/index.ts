@@ -2,6 +2,7 @@ import "./index.css";
 
 import * as BABYLON from "babylonjs";
 import * as GUI from 'babylonjs-gui';
+import 'babylonjs-loaders';
 import Keycode from "keycode.js";
 
 import { client } from "./game/network";
