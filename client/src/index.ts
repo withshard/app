@@ -3,6 +3,8 @@ import "./index.css";
 import * as BABYLON from "babylonjs";
 import * as GUI from 'babylonjs-gui';
 import 'babylonjs-loaders';
+import * as cannon from 'cannon';
+
 import Keycode from "keycode.js";
 
 import { client } from "./game/network";
@@ -17,6 +19,11 @@ const engine = new BABYLON.Engine(canvas, true);
 
 // This creates a basic Babylon Scene object (non-mesh)
 var scene = new BABYLON.Scene(engine);
+//scene.debugLayer.show();
+
+var gravityVector = new BABYLON.Vector3(0,-9.81, 0);
+var physicsPlugin = new BABYLON.CannonJSPlugin(true, 10, cannon);
+scene.enablePhysics(gravityVector, physicsPlugin);
 
 var camera = new BABYLON.ArcRotateCamera("camera", -1.5, 1, 10, BABYLON.Vector3.Zero(), scene);
 camera.attachControl(canvas, true);
@@ -28,7 +35,8 @@ var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0),
 light.intensity = 0.7;
 
 // Our built-in 'ground' shape. Params: name, width, depth, subdivs, scene
-var ground = BABYLON.Mesh.CreateGround("ground1", 6, 6, 2, scene);
+var ground = BABYLON.Mesh.CreateGround("ground1", 40, 40, 2, scene);
+ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, scene);
 
 const playerName = prompt("What's your name?");
 
@@ -36,23 +44,23 @@ const createAvatar = (scene: BABYLON.Scene, colour: Colour, name: string) => {
     const sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
     sphere.position.y = 1;    
 
-        const material = new BABYLON.StandardMaterial(`mat1`, scene);
-        material.alpha = 1;
-        material.diffuseColor = new BABYLON.Color3(colour.r, colour.g, colour.b);
-        sphere.material = material;
+    const material = new BABYLON.StandardMaterial(`mat1`, scene);
+    material.alpha = 1;
+    material.diffuseColor = new BABYLON.Color3(colour.r, colour.g, colour.b);
+    sphere.material = material;
 
-        const nametag = BABYLON.Mesh.CreatePlane("nametag", 0.7, scene);
-        nametag.parent = sphere;
-        nametag.position.y = 2;
-        
-        const advancedTexture = GUI.AdvancedDynamicTexture.CreateForMesh(nametag);
+    const nametag = BABYLON.Mesh.CreatePlane("nametag", 0.7, scene);
+    nametag.parent = sphere;
+    nametag.position.y = 2;
+    
+    const advancedTexture = GUI.AdvancedDynamicTexture.CreateForMesh(nametag);
 
-        const nameButton = GUI.Button.CreateSimpleButton("but1", name);
-        nameButton.color = "white";
-        nameButton.fontSize = 150;
-        nameButton.background = "green";
-        
-        advancedTexture.addControl(nameButton);
+    const nameButton = GUI.Button.CreateSimpleButton("but1", name);
+    nameButton.color = "white";
+    nameButton.fontSize = 150;
+    nameButton.background = "green";
+    
+    advancedTexture.addControl(nameButton);
 
     return BABYLON.Mesh.MergeMeshes([sphere, nametag], true, true, undefined, false, true);
 } 
@@ -65,8 +73,8 @@ client.joinOrCreate<StateHandler>("game", {playerName}).then(room => {
     room.state.players.onAdd = function(player, key) {
     
         playerViews[key] = createAvatar(scene, player.colour, player.name);
+        playerViews[key].physicsImpostor = new BABYLON.PhysicsImpostor(playerViews[key], BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.9 }, scene);
 
-        // Move the sphere upward 1/2 its height
         playerViews[key].position.set(player.position.x, player.position.y, player.position.z);
 
         // Update player position based on changes from the server.
